@@ -60,35 +60,22 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 	//////////////////////////////////////////////////////////////////////////////////////
 
 	@Override
+	public void onOpen(SQLiteDatabase db) {
+		executePragmas(db);
+	};
+
+	@Override
 	public void onCreate(SQLiteDatabase db) {
-		if (SQLiteUtils.FOREIGN_KEYS_SUPPORTED) {
-			db.execSQL("PRAGMA foreign_keys=ON;");
-			Log.i("Foreign Keys supported. Enabling foreign key features.");
-		}
-
-		db.beginTransaction();
-
-		for (TableInfo tableInfo : Cache.getTableInfos()) {
-			db.execSQL(SQLiteUtils.createTableDefinition(tableInfo));
-		}
-
-		db.setTransactionSuccessful();
-		db.endTransaction();
-
+		executePragmas(db);
+		executeCreate(db);
 		executeMigrations(db, -1, db.getVersion());
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		if (SQLiteUtils.FOREIGN_KEYS_SUPPORTED) {
-			db.execSQL("PRAGMA foreign_keys=ON;");
-			Log.i("Foreign Keys supported. Enabling foreign key features.");
-		}
-
-		if (!executeMigrations(db, oldVersion, newVersion)) {
-			Log.i("No migrations found. Calling onCreate.");
-			onCreate(db);
-		}
+		executePragmas(db);
+		executeCreate(db);
+		executeMigrations(db, oldVersion, newVersion);
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////
@@ -132,6 +119,26 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 	// PRIVATE METHODS
 	//////////////////////////////////////////////////////////////////////////////////////
 
+	private void executePragmas(SQLiteDatabase db) {
+		if (SQLiteUtils.FOREIGN_KEYS_SUPPORTED) {
+			db.execSQL("PRAGMA foreign_keys=ON;");
+			Log.i("Foreign Keys supported. Enabling foreign key features.");
+		}
+	}
+
+	private void executeCreate(SQLiteDatabase db) {
+		db.beginTransaction();
+		try {
+			for (TableInfo tableInfo : Cache.getTableInfos()) {
+				db.execSQL(SQLiteUtils.createTableDefinition(tableInfo));
+			}
+			db.setTransactionSuccessful();
+		}
+		finally {
+			db.endTransaction();
+		}
+	}
+
 	private boolean executeMigrations(SQLiteDatabase db, int oldVersion, int newVersion) {
 		boolean migrationExecuted = false;
 		try {
@@ -139,25 +146,27 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 			Collections.sort(files, new NaturalOrderComparator());
 
 			db.beginTransaction();
+			try {
+				for (String file : files) {
+					try {
+						final int version = Integer.valueOf(file.replace(".sql", ""));
 
-			for (String file : files) {
-				try {
-					final int version = Integer.valueOf(file.replace(".sql", ""));
+						if (version > oldVersion && version <= newVersion) {
+							executeSqlScript(db, file);
+							migrationExecuted = true;
 
-					if (version > oldVersion && version <= newVersion) {
-						executeSqlScript(db, file);
-						migrationExecuted = true;
-
-						Log.i(file + " executed succesfully.");
+							Log.i(file + " executed succesfully.");
+						}
+					}
+					catch (NumberFormatException e) {
+						Log.w("Skipping invalidly named file: " + file, e);
 					}
 				}
-				catch (NumberFormatException e) {
-					Log.w("Skipping invalidly named file: " + file, e);
-				}
+				db.setTransactionSuccessful();
 			}
-
-			db.setTransactionSuccessful();
-			db.endTransaction();
+			finally {
+				db.endTransaction();
+			}
 		}
 		catch (IOException e) {
 			Log.e("Failed to execute migrations.", e);
