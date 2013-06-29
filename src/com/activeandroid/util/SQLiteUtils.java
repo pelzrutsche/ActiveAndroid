@@ -16,6 +16,8 @@ package com.activeandroid.util;
  * limitations under the License.
  */
 
+import static com.activeandroid.Model.Columns.ID;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -149,7 +151,7 @@ public final class SQLiteUtils {
 				definition += "(" + column.length() + ")";
 			}
 
-			if (name.equals("Id")) {
+			if (name.equals(ID)) {
 				definition += " PRIMARY KEY AUTOINCREMENT";
 			}
 
@@ -162,7 +164,7 @@ public final class SQLiteUtils {
 			}
 
 			if (FOREIGN_KEYS_SUPPORTED && ReflectionUtils.isModel(type)) {
-				definition += " REFERENCES " + tableInfo.getTableName() + "(Id)";
+				definition += " REFERENCES " + tableInfo.getTableName() + "(" + ID + ")";
 				definition += " ON DELETE " + column.onDelete().toString().replace("_", " ");
 				definition += " ON UPDATE " + column.onUpdate().toString().replace("_", " ");
 			}
