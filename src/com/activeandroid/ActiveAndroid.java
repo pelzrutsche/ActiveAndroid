@@ -16,7 +16,7 @@ package com.activeandroid;
  * limitations under the License.
  */
 
-import android.app.Application;
+import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.activeandroid.util.Log;
@@ -26,21 +26,21 @@ public final class ActiveAndroid {
 	// PUBLIC METHODS
 	//////////////////////////////////////////////////////////////////////////////////////
 
-	public static void initialize(Application application) {
-		initialize(application, Cache.DEFAULT_CACHE_SIZE, false);
+	public static void initialize(Context context) {
+		initialize(context, Cache.DEFAULT_CACHE_SIZE, false);
 	}
 
-	public static void initialize(Application application, int cacheSize) {
-		initialize(application, cacheSize, false);
+	public static void initialize(Context context, int cacheSize) {
+		initialize(context, cacheSize, false);
 	}
 
-	public static void initialize(Application application, boolean loggingEnabled) {
+	public static void initialize(Context application, boolean loggingEnabled) {
 		initialize(application, Cache.DEFAULT_CACHE_SIZE, loggingEnabled);
 	}
 
-	public static void initialize(Application application, int cacheSize, boolean loggingEnabled) {
+	public static void initialize(Context context, int cacheSize, boolean loggingEnabled) {
 		setLoggingEnabled(loggingEnabled);
-		Cache.initialize(application, cacheSize);
+		Cache.initialize(context, cacheSize);
 	}
 
 	public static void clearCache() {

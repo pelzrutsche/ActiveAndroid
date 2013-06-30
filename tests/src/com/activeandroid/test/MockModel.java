@@ -17,8 +17,24 @@ package com.activeandroid.test;
  */
 
 import com.activeandroid.Model;
+import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
 
 @Table(name = "MockModel")
 public class MockModel extends Model {
+	
+	public interface Columns extends Model.Columns {
+		String NAME = "name";
+	}
+	
+	@Column(name = Columns.NAME)
+	private String name;
+	
+	public String getName() {
+		return name;
+	}
+	
+	public void setName(String name) {
+		this.name = name;
+	}
 }

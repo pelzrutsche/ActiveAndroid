@@ -3,7 +3,6 @@ package com.activeandroid.content;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.app.Application;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
@@ -36,7 +35,7 @@ public class ContentProvider extends android.content.ContentProvider {
 
 	@Override
 	public boolean onCreate() {
-		ActiveAndroid.initialize((Application) getContext().getApplicationContext());
+		ActiveAndroid.initialize(getContext().getApplicationContext());
 		sAuthority = getAuthority();
 
 		final List<TableInfo> tableInfos = new ArrayList<TableInfo>(Cache.getTableInfos());

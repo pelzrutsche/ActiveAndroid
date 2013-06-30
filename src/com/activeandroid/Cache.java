@@ -18,7 +18,6 @@ package com.activeandroid;
 
 import java.util.Collection;
 
-import android.app.Application;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.util.LruCache;
@@ -57,15 +56,15 @@ public final class Cache {
 	// PUBLIC METHODS
 	//////////////////////////////////////////////////////////////////////////////////////
 
-	public static synchronized void initialize(Application application, int cacheSize) {
+	public static synchronized void initialize(Context context, int cacheSize) {
 		if (sIsInitialized) {
 			Log.v("ActiveAndroid already initialized.");
 			return;
 		}
 
-		sContext = application;
+		sContext = context;
 
-		sModelInfo = new ModelInfo(application);
+		sModelInfo = new ModelInfo(context);
 		sDatabaseHelper = new DatabaseHelper(sContext);
 
         // TODO: It would be nice to override sizeOf here and calculate the memory

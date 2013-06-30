@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 
-import android.app.Application;
 import android.content.Context;
 import android.text.TextUtils;
 
@@ -58,10 +57,10 @@ final class ModelInfo {
 	// CONSTRUCTORS
 	//////////////////////////////////////////////////////////////////////////////////////
 
-	public ModelInfo(Application application) {
-		if (!loadModelFromMetaData(application)) {
+	public ModelInfo(Context context) {
+		if (!loadModelFromMetaData(context)) {
 			try {
-				scanForModel(application);
+				scanForModel(context);
 			}
 			catch (IOException e) {
 				Log.e("Couldn't open source path.", e);
@@ -96,16 +95,16 @@ final class ModelInfo {
 	// PRIVATE METHODS
 	//////////////////////////////////////////////////////////////////////////////////////
 
-	private boolean loadModelFromMetaData(Application application) {
-		final String modelList = ReflectionUtils.getMetaData(application, AA_MODELS);
-		final String serializerList = ReflectionUtils.getMetaData(application, AA_SERIALIZERS);
+	private boolean loadModelFromMetaData(Context context) {
+		final String modelList = ReflectionUtils.getMetaData(context, AA_MODELS);
+		final String serializerList = ReflectionUtils.getMetaData(context, AA_SERIALIZERS);
 
 		if (!TextUtils.isEmpty(modelList)) {
-			loadModelList(application, modelList.split(","));
+			loadModelList(context, modelList.split(","));
 		}
 
 		if (!TextUtils.isEmpty(serializerList)) {
-			loadSerializerList(application, serializerList.split(","));
+			loadSerializerList(context, serializerList.split(","));
 		}
 
 		return mTableInfos.size() > 0;
@@ -157,9 +156,9 @@ final class ModelInfo {
 		return packageName + name.trim();
 	}
 
-	private void scanForModel(Application application) throws IOException {
-		String packageName = application.getPackageName();
-		String sourcePath = application.getApplicationInfo().sourceDir;
+	private void scanForModel(Context context) throws IOException {
+		String packageName = context.getPackageName();
+		String sourcePath = context.getApplicationInfo().sourceDir;
 		List<String> paths = new ArrayList<String>();
 
 		if (sourcePath != null) {
@@ -185,7 +184,7 @@ final class ModelInfo {
 
 		for (String path : paths) {
 			File file = new File(path);
-			scanForModelClasses(file, packageName, application.getClass().getClassLoader());
+			scanForModelClasses(file, packageName, context.getClassLoader());
 		}
 	}
 
